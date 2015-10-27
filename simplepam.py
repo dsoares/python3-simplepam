@@ -1,3 +1,6 @@
+# Modified 2015-2015 Diana Soares <diana.soares@gmail.com>:
+# See README.md for changelog
+#
 # Modified 2013-2014 Leon Weber <leon@leonweber.de>:
 # See README.md for changelog
 #
@@ -92,6 +95,18 @@ pam_authenticate = libpam.pam_authenticate
 pam_authenticate.restype = c_int
 pam_authenticate.argtypes = [PamHandle, c_int]
 
+pam_open_session = libpam.pam_open_session
+pam_open_session.restype = c_int
+pam_open_session.argtypes = [PamHandle, c_int]
+
+pam_close_session = libpam.pam_close_session
+pam_close_session.restype = c_int
+pam_close_session.argtypes = [PamHandle, c_int]
+
+pam_acct_mgmt = libpam.pam_acct_mgmt
+pam_acct_mgmt.restype = c_int
+pam_acct_mgmt.argtypes = [PamHandle, c_int]
+
 pam_setcred = libpam.pam_setcred
 pam_setcred.restype = c_int
 pam_setcred.argtypes = [PamHandle, c_int]
@@ -146,15 +161,18 @@ def authenticate(username, password, service='login', encoding='utf-8',
                 p_response.contents[i].resp_retcode = 0
         return 0
 
+    # pam_start
     handle = PamHandle()
-    conv = PamConv(my_conv, 0)
+    conv   = PamConv(my_conv, 0)
     retval = pam_start(service, username, byref(conv), byref(handle))
 
     if retval != 0:
         # TODO: This is not an authentication error, something
         # has gone wrong starting up PAM
+        pam_end(handle, retval)
         return False
 
+    # pam_authenticate
     retval = pam_authenticate(handle, 0)
     auth_success = (retval == 0)
 
@@ -164,6 +182,11 @@ def authenticate(username, password, service='login', encoding='utf-8',
     if auth_success and resetcred:
         retval = pam_setcred(handle, PAM_REINITIALIZE_CRED)
 
+    # try pam_open_session
+    retval = pam_open_session(handle, 0)
+    auth_success = (retval == 0)
+
+    # pam_end
     pam_end(handle, retval)
 
     return auth_success

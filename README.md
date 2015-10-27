@@ -56,4 +56,7 @@ Modifications 2013-2014 by Leon Weber <leon@leonweber.de>:
 * Add call to ``pam_reset()`` (Patch by Lertsenem)
 * Re-add Python2 support (Patch by Victor Stinner of eNovance)
 
+Modification 2015-10-27 by Diana Soares <diana.soares@gmail.com>
+* Enable the authentication process to call the ``pam_open_session()``.
+
 This module is licensed under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
